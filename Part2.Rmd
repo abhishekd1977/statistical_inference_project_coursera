@@ -1,0 +1,52 @@
+---
+title: "ToothGrowth"
+author: "Abhishek Dubey"
+date: "4/11/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("lattice")
+```
+
+## Objective
+1. Load the ToothGrowth data and perform some basic exploratory data analyses
+2. Provide a basic summary of the data.
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+4. State your conclusions and the assumptions needed for your conclusions.
+
+## Data Exploration
+```{r}
+#Load Data
+data(ToothGrowth)
+#Explore data
+str(ToothGrowth)
+summary(ToothGrowth)
+head(ToothGrowth)
+unique(ToothGrowth$dose)
+
+#Convert dose to factor
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+
+#Plot len by dose partition by supp
+bwplot(len ~ dose | supp,data=ToothGrowth)
+```
+
+## Hypothesis Testing
+### Hypothesis for the supplement OJ vs VC
+null hypothesis: No difference in tooth growth when using the supplement OJ and VC.
+Alternate Hyphothesis: More tooth growth when using supplement OJ than VC.
+
+```{r}
+# Partition the data set by supp
+OJ = ToothGrowth$len[ToothGrowth$supp == 'OJ']
+VC = ToothGrowth$len[ToothGrowth$supp == 'VC']
+```
+
+#### Perform One-tailed independent t-test with unequal variance
+```{r}
+t.test(OJ, VC, alternative = "greater", paired = FALSE, var.equal = FALSE, conf.level = 0.95)
+```
+
+As the p-value (0.03032) is lower than 0.05, we reject the null hypothesis. Based on this low p-value, we can conclude that it is very likely that supplement OJ has higher effect on tooth growth than supplement VC.
