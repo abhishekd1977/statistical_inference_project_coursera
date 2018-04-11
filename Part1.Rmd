@@ -7,24 +7,56 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
 ```
 
-## R Markdown
+## Objective
+The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter. The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. Set lambda = 0.2 for all of the simulations. Investigate the distribution of averages of 40 exponentials over a thousand simulations.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+#
+set.seed(12323)
+lambda <- 0.2
+n <- 40
+simulations <- 1000
 
-```{r cars}
-summary(cars)
+# simulate
+simdata <- matrix(rexp(simulations * n, rate=lambda), simulations)
+
+# calculate mean of exponentials
+simdata_means <- apply(simdata, 1, mean)
+hist(simdata_means, col="green")
 ```
 
-## Including Plots
+### 1. Show the sample mean and compare it to the theoretical mean of the distribution.
+```{r}
+#Mean of exponential distribution is 1/lambda
 
-You can also embed plots, for example:
+mean_exp_dist <- 1/lambda
+print (paste("Theoretical center of the distribution = ", mean_exp_dist))
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+print (paste("Actual center of the distribution based on the simulations = ", round(mean(simdata_means), 2)))
+
+```
+### 2. Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+```{r}
+
+theoretical_variance <- (1/lambda)^2/n
+print (paste("Theoretical variance = ", theoretical_variance))
+
+print (paste("Actual variance = ", round(var(simdata_means), 3)))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### 3. Show that the distribution is approximately normal.
+```{r}
+plotdata <- data.frame(simdata_means)
+m <- ggplot(plotdata, aes(x = simdata_means))
+m <- m + geom_histogram(aes(y=..density..), colour="black", fill = "blue")
+m + geom_density(colour="red", size=1)
+
+# compare the distribution of averages of 40 exponentials to a normal distribution
+qqnorm(simdata_means)
+qqline(simdata_means, col = 2)
+
+```
